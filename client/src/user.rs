@@ -1,7 +1,7 @@
 use std::{env, io::Error, io::ErrorKind};
 
-const username_env_key: &str = "ZKP_USERNAME";
-const secret_env_key: &str = "ZKP_SECRET";
+const USERNAME: &str = "ZKP_USERNAME";
+const SECRET: &str = "ZKP_SECRET";
 
 #[derive(Debug, PartialEq)]
 pub struct UserInfo {
@@ -12,8 +12,8 @@ pub struct UserInfo {
 pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
     let mut errors: Vec<Error> = Vec::new();
 
-    let username = env::var(username_env_key);
-    let secret = env::var(secret_env_key);
+    let username = env::var(USERNAME);
+    let secret = env::var(SECRET);
 
     if username.as_ref().is_err() {
         errors.push(Error::new(
@@ -60,8 +60,8 @@ mod unittests {
     use pretty_assertions::assert_eq;
 
     fn clear_env_vars() {
-        env::remove_var(username_env_key);
-        env::remove_var(secret_env_key);
+        env::remove_var(USERNAME);
+        env::remove_var(SECRET);
     }
 
     #[test]
@@ -92,7 +92,7 @@ mod unittests {
         clear_env_vars();
         // provide an invalid username
         let string_longer_than_50_chars = (0..51).map(|_| "a").collect::<String>();
-        env::set_var(username_env_key, string_longer_than_50_chars);
+        env::set_var(USERNAME, string_longer_than_50_chars);
         let res = get_user_info_from_env_vars();
         assert!(res.is_err());
         assert!(res
@@ -108,7 +108,7 @@ mod unittests {
         clear_env_vars();
         // provide a non-number secret
         let invalid_secret = "invalid-string-secret";
-        env::set_var(secret_env_key, invalid_secret);
+        env::set_var(SECRET, invalid_secret);
         let res = get_user_info_from_env_vars();
         assert!(res.is_err());
         println!("{:?}", &res);
@@ -124,8 +124,8 @@ mod unittests {
     fn valid_username_and_secret() {
         clear_env_vars();
         // provide a valid username and secret
-        env::set_var(username_env_key, "testuser");
-        env::set_var(secret_env_key, "1000");
+        env::set_var(USERNAME, "testuser");
+        env::set_var(SECRET, "1000");
         let res = get_user_info_from_env_vars();
         assert!(res.is_ok());
         assert_eq!(

@@ -1,5 +1,4 @@
 use crate::challenge::*;
-use serde_json::json;
 use zkp_common::dto::*;
 
 use warp::{reply, Reply};
