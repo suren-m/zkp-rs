@@ -1,9 +1,42 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct User {
-    pub username: String,
+pub enum RequestType {
+    Register,
+    Authentication,
+    ProveAuthentication,
+    VerifyAuthRequest,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum ResponseType {
+    Success,
+    Failure,
+    Error,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Response {
+    pub response_type: ResponseType,
+    pub users: Vec<User>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Request {
+    pub request_type: RequestType,
+    pub user: User,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct User {
+    pub id: i32,
+    pub name: String,
+}
+
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// pub struct User {
+//     pub username: String,
+// }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Commits {
