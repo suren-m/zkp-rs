@@ -8,7 +8,7 @@ use std::net::TcpStream;
 use std::process::exit;
 use zkp_client::user;
 use zkp_common::request_dto::{ClientRequest, Commits};
-use zkp_common::response_dto::{Message, ResponseType, ServerResponse};
+use zkp_common::response_dto::ServerResponse;
 
 fn init_logger() {
     // set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/
@@ -44,8 +44,7 @@ fn main() {
             let br = BufReader::new(stream);
 
             println!("printing buf reader contents");
-            let res: Result<ServerResponse<String>, serde_json::Error> =
-                serde_json::from_reader(br);
+            let res: Result<ServerResponse, serde_json::Error> = serde_json::from_reader(br);
 
             if res.is_err() {
                 println!("Deserialization Error");
@@ -53,12 +52,21 @@ fn main() {
             } else {
                 println!("unwrapping response");
                 let res = res.unwrap();
-                if let ResponseType::Success = res.response_type {
-                    dbg!("success");
-                    dbg!(res);
-                } else {
-                    dbg!("failure");
-                    dbg!(res);
+                match &res {
+                    ServerResponse::Success => {
+                        info!("sucess resp received");
+                        dbg!(&res);
+                    }
+                    ServerResponse::Challenge(msg) => {
+                        info!("challenge resp received");
+                        dbg!(&res);
+                        dbg!(msg);
+                    }
+                    ServerResponse::Failure(msg) => {
+                        info!("failure resp received");
+                        dbg!(&res);
+                        dbg!(msg);
+                    }
                 }
             }
 

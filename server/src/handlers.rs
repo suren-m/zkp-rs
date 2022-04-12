@@ -5,10 +5,7 @@ use std::{
     io::{Error, ErrorKind, Write},
     net::TcpStream,
 };
-use zkp_common::{
-    request_dto::ClientRequest,
-    response_dto::{Message, ResponseType, ServerResponse},
-};
+use zkp_common::{request_dto::ClientRequest, response_dto::ServerResponse};
 
 use crate::session_store::SessionStore;
 
@@ -23,31 +20,24 @@ pub fn handle_request(
 
             if username.len() > 50 {
                 info!("username too long");
-                let fail_resp = ServerResponse::<String> {
-                    response_type: ResponseType::Failure,
-                    data: String::from("invalid user"),
-                };
-                return write_and_flush_stream(stream, fail_resp);
+                return write_and_flush_stream(
+                    stream,
+                    ServerResponse::Failure("username must be less than 50 characters".to_string()),
+                );
             }
 
             if let Some(_) = session_store.users.get(&username) {
                 info!("User already exists. Returning failure");
-                let fail_resp = ServerResponse::<String> {
-                    response_type: ResponseType::Failure,
-                    data: String::from(
-                        "username already exists. Login again or pick a different username",
+                return write_and_flush_stream(
+                    stream,
+                    ServerResponse::Failure(
+                        "user already exists. Login again or pick a different username".to_string(),
                     ),
-                };
-                return write_and_flush_stream(stream, fail_resp);
+                );
             }
 
             session_store.register(username, commits);
-
-            let sucess_resp = ServerResponse::<String> {
-                response_type: ResponseType::Success,
-                data: String::from("Registration Successful. Proceed with auth"),
-            };
-            return write_and_flush_stream(stream, sucess_resp);
+            return write_and_flush_stream(stream, ServerResponse::Success);
         }
         zkp_common::request_dto::ClientRequest::Authenticate => Ok(()),
         zkp_common::request_dto::ClientRequest::ProveAuthentication(answer) => Ok(()),
