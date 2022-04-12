@@ -5,8 +5,8 @@ const SECRET: &str = "ZKP_SECRET";
 
 #[derive(Debug, PartialEq)]
 pub struct UserInfo {
-    username: String,
-    secret: u128,
+    pub username: String,
+    pub secret: u128,
 }
 
 pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
@@ -20,7 +20,7 @@ pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
             ErrorKind::NotFound,
             "Please make sure ZKP_USERNAME env variable is set",
         ));
-    } else if &username.as_ref().unwrap().len() > &50 {
+    } else if &username.as_ref().unwrap().len() > &50000 {
         errors.push(Error::new(
             ErrorKind::InvalidInput,
             "Please make sure ZKP_USERNAME is less than 50 characters",

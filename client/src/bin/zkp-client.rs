@@ -7,7 +7,8 @@ use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 use std::process::exit;
 use zkp_client::user;
-use zkp_common::dto::{Request, RequestType, User};
+use zkp_common::request_dto::{ClientRequest, Commits};
+use zkp_common::response_dto::{Message, ResponseType, ServerResponse};
 
 fn init_logger() {
     // set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/
@@ -24,20 +25,16 @@ fn main() {
         }
         exit(-1);
     }
+    let user_info = user_info.unwrap();
 
     let socket = "localhost:8080";
     match TcpStream::connect(socket) {
         Ok(mut stream) => {
             let msg = b"Get some data";
-            let test = User {
-                id: 1,
-                name: "TestUser".to_string(),
-            };
-            let register_req = Request {
-                request_type: RequestType::Authentication,
-                user: test,
-            };
-            let j = serde_json::to_string(&register_req).unwrap();
+
+            let req = ClientRequest::Register(user_info.username, Commits { r1: 10, r2: 20 });
+
+            let j = serde_json::to_string(&req).unwrap();
             stream.write(j.as_bytes()).unwrap();
 
             // below will work but sending anything other than json string will result in connection reset
@@ -45,10 +42,27 @@ fn main() {
             //stream.write(test.to_string().as_bytes()).unwrap();
 
             let br = BufReader::new(stream);
+
             println!("printing buf reader contents");
-            let res: Result<zkp_common::dto::Response, serde_json::Error> =
+            let res: Result<ServerResponse<String>, serde_json::Error> =
                 serde_json::from_reader(br);
-            dbg!(res);
+
+            if res.is_err() {
+                println!("Deserialization Error");
+                error!("{}", res.err().unwrap());
+            } else {
+                println!("unwrapping response");
+                let res = res.unwrap();
+                if let ResponseType::Success = res.response_type {
+                    dbg!("success");
+                    dbg!(res);
+                } else {
+                    dbg!("failure");
+                    dbg!(res);
+                }
+            }
+
+            //dbg!(res);
             println!("done");
         }
         Err(_) => println!("can't connect"),

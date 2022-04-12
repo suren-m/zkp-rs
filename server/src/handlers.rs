@@ -1,157 +1,93 @@
-use std::{collections::HashMap, io::Write, net::TcpStream};
+use log::info;
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::HashMap,
+    io::{Error, ErrorKind, Write},
+    net::TcpStream,
+};
+use zkp_common::{
+    request_dto::ClientRequest,
+    response_dto::{Message, ResponseType, ServerResponse},
+};
 
-use crate::challenge::*;
-use zkp_common::dto::*;
+use crate::session_store::SessionStore;
 
-use warp::{reply, Reply};
+pub fn handle_request(
+    req: ClientRequest,
+    session_store: &mut SessionStore,
+    stream: &mut TcpStream,
+) -> Result<(), Error> {
+    match req {
+        zkp_common::request_dto::ClientRequest::Register(username, commits) => {
+            info!("Register Request Received");
 
-use crate::WebResult;
-
-pub async fn register_handler(register_req: RegisterRequest) -> WebResult<impl Reply> {
-    println!("register request");
-
-    Ok(reply())
-}
-
-pub async fn create_auth_handler(create_auth_req: CreateAuthRequest) -> WebResult<impl Reply> {
-    println!("create auth request");
-
-    let challenge = Challenge::new();
-    Ok(reply::json(&"test"))
-}
-
-pub async fn verify_auth_handler(verify_auth_req: VerifyAuthRequest) -> WebResult<impl Reply> {
-    println!("verify auth request");
-    let result = true;
-
-    Ok(reply::json(&result))
-}
-pub fn handle_request(req: Request, mut stream: TcpStream, users: &mut HashMap<i32, String>) {
-    match req.request_type {
-        zkp_common::dto::RequestType::Register => {
-            println!("Human says Register: {:?}", req.user);
-            create(users);
-
-            for i in 0..10 {
-                update(users, i);
-            }
-            let mut users_vec: Vec<User> = Vec::new();
-            for (k, v) in users.iter().enumerate() {
-                let user = User {
-                    id: k as i32,
-                    name: v.1.to_string(),
+            if username.len() > 50 {
+                info!("username too long");
+                let fail_resp = ServerResponse::<String> {
+                    response_type: ResponseType::Failure,
+                    data: String::from("invalid user"),
                 };
-                users_vec.push(user);
+                return write_and_flush_stream(stream, fail_resp);
             }
-            let resp = Response {
-                response_type: ResponseType::Success,
-                users: users_vec,
-            };
-            let j = serde_json::to_string(&resp).unwrap();
-            stream.write(j.as_bytes()).unwrap();
-            stream.flush().unwrap();
-        }
-        zkp_common::dto::RequestType::Authentication => {
-            println!("Human says Auth: {:?}", req.user);
-            create(users);
 
-            for i in 0..10 {
-                update(users, i);
-            }
-            let mut users_vec: Vec<User> = Vec::new();
-            for (k, v) in users.iter().enumerate() {
-                let user = User {
-                    id: k as i32,
-                    name: v.1.to_string(),
+            if let Some(_) = session_store.users.get(&username) {
+                info!("User already exists. Returning failure");
+                let fail_resp = ServerResponse::<String> {
+                    response_type: ResponseType::Failure,
+                    data: String::from(
+                        "username already exists. Login again or pick a different username",
+                    ),
                 };
-                users_vec.push(user);
+                return write_and_flush_stream(stream, fail_resp);
             }
-            let resp = Response {
-                response_type: ResponseType::Success,
-                users: users_vec,
-            };
-            let j = serde_json::to_string(&resp).unwrap();
-            dbg!(&j);
-            stream.write(j.as_bytes()).unwrap();
-            stream.flush().unwrap();
-        }
-        zkp_common::dto::RequestType::ProveAuthentication => {
-            println!("Human says Prove: {:?}", req.user);
-            create(users);
 
-            for i in 0..2 {
-                update(users, i);
-            }
-            let mut users_vec: Vec<User> = Vec::new();
-            for (k, v) in users.iter().enumerate() {
-                let user = User {
-                    id: k as i32,
-                    name: v.1.to_string(),
-                };
-                users_vec.push(user);
-            }
-            let resp = Response {
-                response_type: ResponseType::Success,
-                users: users_vec,
-            };
-            let j = serde_json::to_string(&resp).unwrap();
-            dbg!(&j);
-            stream.write(j.as_bytes()).unwrap();
-            stream.flush().unwrap();
-        }
-        zkp_common::dto::RequestType::VerifyAuthRequest => {
-            println!("Human says Verify: {:?}", req.user);
-            create(users);
+            session_store.register(username, commits);
 
-            for i in 0..10 {
-                update(users, i);
-            }
-            let mut users_vec: Vec<User> = Vec::new();
-            for (k, v) in users.iter().enumerate() {
-                let user = User {
-                    id: k as i32,
-                    name: v.1.to_string(),
-                };
-                users_vec.push(user);
-            }
-            let resp = Response {
+            let sucess_resp = ServerResponse::<String> {
                 response_type: ResponseType::Success,
-                users: users_vec,
+                data: String::from("Registration Successful. Proceed with auth"),
             };
-            let j = serde_json::to_string(&resp).unwrap();
-            stream.write(j.as_bytes()).unwrap();
-            stream.flush().unwrap();
+            return write_and_flush_stream(stream, sucess_resp);
         }
+        zkp_common::request_dto::ClientRequest::Authenticate => Ok(()),
+        zkp_common::request_dto::ClientRequest::ProveAuthentication(answer) => Ok(()),
     }
 }
 
-pub fn create(users: &mut HashMap<i32, String>) {
-    users.insert(1, "hello".to_string());
-}
-pub fn update(users: &mut HashMap<i32, String>, id: i32) {
-    users.insert(id, "hello again".to_string());
+fn write_and_flush_stream<T: Serialize>(stream: &mut TcpStream, data: T) -> Result<(), Error> {
+    let j = serde_json::to_string(&data);
+    if j.is_ok() {
+        let res = j.unwrap();
+        info!("writing to response stream");
+        dbg!(&res);
+        stream.write(res.as_bytes()).unwrap();
+        stream.flush().unwrap();
+        Ok(())
+    } else {
+        return Err(Error::new(ErrorKind::Other, j.err().unwrap()));
+    }
 }
 
 pub fn handle_error(mut stream: TcpStream, users: &mut HashMap<i32, String>) {
-    create(users);
+    // create(users);
 
-    for i in 0..10 {
-        update(users, i);
-    }
-    let mut users_vec: Vec<User> = Vec::new();
-    for (k, v) in users.iter().enumerate() {
-        let user = User {
-            id: k as i32,
-            name: v.1.to_string(),
-        };
-        users_vec.push(user);
-    }
-    let resp = Response {
-        response_type: ResponseType::Success,
-        users: users_vec,
-    };
-    let j = serde_json::to_string(&resp).unwrap();
-    dbg!(&j);
-    stream.write(j.as_bytes()).unwrap();
-    stream.flush().unwrap();
+    // for i in 0..10 {
+    //     update(users, i);
+    // }
+    // let mut users_vec: Vec<User> = Vec::new();
+    // for (k, v) in users.iter().enumerate() {
+    //     let user = User {
+    //         id: k as i32,
+    //         name: v.1.to_string(),
+    //     };
+    //     users_vec.push(user);
+    // }
+    // let resp = Response {
+    //     response_type: ResponseType::Success,
+    //     users: users_vec,
+    // };
+    // let j = serde_json::to_string(&resp).unwrap();
+    // dbg!(&j);
+    // stream.write(j.as_bytes()).unwrap();
+    // stream.flush().unwrap();
 }

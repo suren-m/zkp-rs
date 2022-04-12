@@ -1,4 +1,5 @@
-pub mod dto;
+pub mod request_dto;
+pub mod response_dto;
 
 // public info
 // Used when client is making the register commit
