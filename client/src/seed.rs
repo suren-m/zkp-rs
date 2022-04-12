@@ -3,13 +3,17 @@
 use rand::Rng;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Seed(u128);
+pub struct Seed {
+    pub val: u32,
+}
 
 impl Seed {
     /// Random u128 number
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
-        Self(rng.gen_range(1..u128::MAX))
+        Self {
+            val: rng.gen_range(1..25),
+        }
     }
 }
 
@@ -23,6 +27,6 @@ mod unittests {
         let mut rng = rand::thread_rng();
         let k1 = Seed::new();
         let k2 = Seed::new();
-        assert_ne!(c1, c2);
+        assert_ne!(k1, k2);
     }
 }

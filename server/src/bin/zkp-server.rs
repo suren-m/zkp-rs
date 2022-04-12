@@ -40,6 +40,7 @@ fn main() {
     let listener = TcpListener::bind(socket).unwrap();
     println!("listening on {}", socket);
     for stream in listener.incoming() {
+        println!("new stream incoming");
         let stream = stream.unwrap();
         handle_connection(stream, &mut session_store);
     }
@@ -54,10 +55,8 @@ fn handle_connection(mut stream: TcpStream, session_store: &mut SessionStore) {
         println!("req error");
         //handle_error(stream, users);
     } else {
-        println!("req valid");
+        println!("request received");
         let req = req.unwrap();
-
-        dbg!(&req);
         handle_request(req, session_store, &mut stream).unwrap();
     }
 }

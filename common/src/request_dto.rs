@@ -15,6 +15,7 @@ pub struct Answer(u128);
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ClientRequest {
     Register(Username, Commits), // server will respond with a success or failure
-    Authenticate,                // server will respond with a challenge to this
+    Authenticate(Username),      // server will respond with a challenge to this
     ProveAuthentication(Answer), // server will respond with a sucess or failure
+    CheckStatus, // server will respond whether logged in or not. (called after Login flow)
 }

@@ -1,15 +1,62 @@
-use reqwest::{Error, StatusCode};
+use std::{
+    io::{BufReader, ErrorKind},
+    net::TcpStream,
+};
+
+use log::warn;
+use seed::Seed;
+use user::UserInfo;
+use zkp_common::{
+    request_dto::{ClientRequest, Commits, Username},
+    response_dto::ServerResponse,
+    write_and_flush_stream, G, H,
+};
+
+pub mod seed;
 pub mod user;
-use zkp_common::request_dto::*;
 
-// pub async fn register(register_req: RegisterRequest) -> Result<StatusCode, Error> {
-//     let request_url = "http://localhost:8000/register";
+pub fn create_register_commits(k: Seed) -> Commits {
+    Commits {
+        r1: G.pow(k.val),
+        r2: H.pow(k.val),
+    }
+}
 
-//     println!("{}", request_url);
-//     dbg!(&register_req);
+pub fn register_user_with_server(
+    stream: &mut TcpStream,
+    username: Username,
+    commits: Commits,
+) -> Result<ServerResponse, std::io::Error> {
+    let req = ClientRequest::Register(username, commits);
 
-//     let client = reqwest::Client::new();
-//     let response = client.post(request_url).json(&register_req).send().await?;
-//     let status = response.status();
-//     Ok(status)
-// }
+    write_and_flush_stream(stream, req)?;
+
+    let br = BufReader::new(stream);
+    let res: Result<ServerResponse, serde_json::Error> = serde_json::from_reader(br);
+
+    if res.is_err() {
+        warn!("Deserialization Error");
+        return Err(std::io::Error::new(ErrorKind::Other, res.err().unwrap()));
+    }
+
+    Ok(res.unwrap())
+}
+
+pub fn create_auth_request(
+    stream: &mut TcpStream,
+    username: Username,
+) -> Result<ServerResponse, std::io::Error> {
+    let req = ClientRequest::Authenticate(username);
+
+    write_and_flush_stream(stream, req)?;
+
+    let br = BufReader::new(stream);
+    let res: Result<ServerResponse, serde_json::Error> = serde_json::from_reader(br);
+
+    if res.is_err() {
+        warn!("Deserialization Error");
+        return Err(std::io::Error::new(ErrorKind::Other, res.err().unwrap()));
+    }
+
+    Ok(res.unwrap())
+}

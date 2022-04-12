@@ -1,13 +1,18 @@
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct Challenge(u128);
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Challenge {
+    pub val: u32,
+}
 
 impl Challenge {
     /// Random u128 number
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
-        Self(rng.gen_range(1..u128::MAX))
+        Self {
+            val: rng.gen_range(1..25),
+        }
     }
 }
 

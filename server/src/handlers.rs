@@ -5,9 +5,11 @@ use std::{
     io::{Error, ErrorKind, Write},
     net::TcpStream,
 };
-use zkp_common::{request_dto::ClientRequest, response_dto::ServerResponse};
+use zkp_common::{
+    request_dto::ClientRequest, response_dto::ServerResponse, write_and_flush_stream,
+};
 
-use crate::session_store::SessionStore;
+use crate::{challenge::Challenge, session_store::SessionStore};
 
 pub fn handle_request(
     req: ClientRequest,
@@ -15,7 +17,7 @@ pub fn handle_request(
     stream: &mut TcpStream,
 ) -> Result<(), Error> {
     match req {
-        zkp_common::request_dto::ClientRequest::Register(username, commits) => {
+        ClientRequest::Register(username, commits) => {
             info!("Register Request Received");
 
             if username.len() > 50 {
@@ -39,45 +41,12 @@ pub fn handle_request(
             session_store.register(username, commits);
             return write_and_flush_stream(stream, ServerResponse::Success);
         }
-        zkp_common::request_dto::ClientRequest::Authenticate => Ok(()),
-        zkp_common::request_dto::ClientRequest::ProveAuthentication(answer) => Ok(()),
+        ClientRequest::Authenticate(username) => {
+            info!("Autentication Request Received. Responding with Challenge");
+            let challenge = Challenge::new().val;
+            return write_and_flush_stream(stream, ServerResponse::Challenge(challenge));
+        }
+        ClientRequest::ProveAuthentication(answer) => Ok(()),
+        ClientRequest::CheckStatus => todo!(),
     }
-}
-
-fn write_and_flush_stream<T: Serialize>(stream: &mut TcpStream, data: T) -> Result<(), Error> {
-    let j = serde_json::to_string(&data);
-    if j.is_ok() {
-        let res = j.unwrap();
-        info!("writing to response stream");
-        dbg!(&res);
-        stream.write(res.as_bytes()).unwrap();
-        stream.flush().unwrap();
-        Ok(())
-    } else {
-        return Err(Error::new(ErrorKind::Other, j.err().unwrap()));
-    }
-}
-
-pub fn handle_error(mut stream: TcpStream, users: &mut HashMap<i32, String>) {
-    // create(users);
-
-    // for i in 0..10 {
-    //     update(users, i);
-    // }
-    // let mut users_vec: Vec<User> = Vec::new();
-    // for (k, v) in users.iter().enumerate() {
-    //     let user = User {
-    //         id: k as i32,
-    //         name: v.1.to_string(),
-    //     };
-    //     users_vec.push(user);
-    // }
-    // let resp = Response {
-    //     response_type: ResponseType::Success,
-    //     users: users_vec,
-    // };
-    // let j = serde_json::to_string(&resp).unwrap();
-    // dbg!(&j);
-    // stream.write(j.as_bytes()).unwrap();
-    // stream.flush().unwrap();
 }

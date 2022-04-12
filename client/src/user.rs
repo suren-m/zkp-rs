@@ -11,7 +11,8 @@ pub struct UserInfo {
 
 pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
     let mut errors: Vec<Error> = Vec::new();
-
+    // let username = env::set_var(USERNAME, "demouser");
+    // let secret = env::set_var(SECRET, "100");
     let username = env::var(USERNAME);
     let secret = env::var(SECRET);
 
