@@ -17,6 +17,10 @@ pub mod user;
 
 pub const MAX_USERNAME_LEN: usize = 50;
 
+// for convenience
+// min seed value set so that "s = k - c.x" is always positive.
+pub const MIN_SEED_VAL: u32 = 100;
+
 // max random 'k' value.
 // smaller value chosen for convenience during g^K and h^K operations
 pub const MAX_SEED_VAL: u32 = 125;
@@ -78,6 +82,25 @@ pub fn prove_auth(
     answer: Answer,
 ) -> Result<ServerResponse, std::io::Error> {
     let req = ClientRequest::ProveAuthentication(username, answer);
+
+    write_and_flush_stream(stream, req)?;
+
+    let br = BufReader::new(stream);
+    let res: Result<ServerResponse, serde_json::Error> = serde_json::from_reader(br);
+
+    if res.is_err() {
+        warn!("Deserialization Error");
+        return Err(std::io::Error::new(ErrorKind::Other, res.err().unwrap()));
+    }
+
+    Ok(res.unwrap())
+}
+
+pub fn check_status(
+    stream: &mut TcpStream,
+    username: Username,
+) -> Result<ServerResponse, std::io::Error> {
+    let req = ClientRequest::CheckStatus(username);
 
     write_and_flush_stream(stream, req)?;
 

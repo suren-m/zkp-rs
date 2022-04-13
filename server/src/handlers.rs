@@ -62,7 +62,7 @@ pub fn handle_request(
         }
         ClientRequest::ProveAuthentication(username, answer) => {
             info!("Verify Auth Request Received");
-            if let Some(user) = session_store.users.get(&username) {
+            if let Some(user) = session_store.users.get_mut(&username) {
                 dbg!(&user);
                 if user.challenge.is_none() {
                     return write_and_flush_stream(
@@ -70,16 +70,13 @@ pub fn handle_request(
                         ServerResponse::Failure("challenge expired. Retry login".to_owned()),
                     );
                 }
-                // let mut
-                // if answer < 0 {
-                //     let s: u32 = answer.try_into().unwrap() * -1;
-                // }
 
                 let r1 = G.pow(answer) * user.commits.y1.pow(user.challenge.unwrap().val);
                 let r2 = H.pow(answer) * user.commits.y2.pow(user.challenge.unwrap().val);
 
                 if r1 == user.commits.r1 && r2 == user.commits.r2 {
-                    info!("valid user");
+                    info!("verified user");
+                    user.is_verified = true;
                     return write_and_flush_stream(stream, ServerResponse::Success);
                 } else {
                     return write_and_flush_stream(
@@ -96,6 +93,25 @@ pub fn handle_request(
                 );
             }
         }
-        ClientRequest::CheckStatus(username) => todo!(),
+        ClientRequest::CheckStatus(username) => {
+            info!("Status Check Request Received");
+            if let Some(user) = session_store.users.get(&username) {
+                if user.is_verified == true {
+                    return write_and_flush_stream(stream, ServerResponse::Success);
+                } else {
+                    return write_and_flush_stream(
+                        stream,
+                        ServerResponse::Failure(
+                            "User not verified. Try authentication again".to_string(),
+                        ),
+                    );
+                }
+            } else {
+                return write_and_flush_stream(
+                    stream,
+                    ServerResponse::Failure("User not registered.".to_string()),
+                );
+            }
+        }
     }
 }

@@ -1,8 +1,9 @@
 // Random Seed - k
 
+use log::info;
 use rand::Rng;
 
-use crate::MAX_SEED_VAL;
+use crate::{MAX_SEED_VAL, MIN_SEED_VAL};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Seed {
@@ -13,9 +14,9 @@ impl Seed {
     /// Random u32 number
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
-        Self {
-            val: rng.gen_range(1..MAX_SEED_VAL),
-        }
+        let val = rng.gen_range(MIN_SEED_VAL..MAX_SEED_VAL);
+        info!("Seed val: {}", val);
+        Self { val }
     }
 }
 

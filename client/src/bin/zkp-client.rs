@@ -1,12 +1,15 @@
+use core::time;
 use env_logger::Env;
 use log::{error, info};
 use std::io::Error;
 use std::net::TcpStream;
 use std::process::exit;
+use std::thread;
 use zkp_client::seed::Seed;
 use zkp_client::user::{self};
 use zkp_client::{
-    create_auth_request, create_register_commits, prove_auth, register_user_with_server,
+    check_status, create_auth_request, create_register_commits, prove_auth,
+    register_user_with_server,
 };
 use zkp_common::request_dto::Answer;
 use zkp_common::response_dto::ServerResponse;
@@ -52,6 +55,17 @@ fn main() -> Result<(), Error> {
             let verify_resp = prove_auth(&mut stream, user_info.username.to_owned(), answer)?;
             if let ServerResponse::Success = verify_resp {
                 info!("Login sucessful.");
+                loop {
+                    info!("checking status");
+                    thread::sleep(time::Duration::from_secs(5));
+                    let mut stream = connect(socket)?;
+                    let status_resp = check_status(&mut stream, user_info.username.to_owned())?;
+                    if let ServerResponse::Success = status_resp {
+                        info!("still logged in");
+                    } else {
+                        error!("Not Logged in. Try authenticating again");
+                    }
+                }
             } else if let ServerResponse::Failure(msg) = verify_resp {
                 error!("login failed {}", msg);
             }
