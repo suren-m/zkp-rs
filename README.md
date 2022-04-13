@@ -1,17 +1,22 @@
 # [WIP] - zkp-rs
 Zero Knowledge Proof demonstration in Rust using client-server model. 
 
-## Local using `cargo run`
+<!-- | CI Build and Tests |
+| --------------- | -->
+| ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) | 
+[![build-and-push-zkp-container-images](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml/badge.svg?branch=main)](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml)
 
-![Screenshot from 2022-04-13 14-28-42](https://user-images.githubusercontent.com/3830633/163191624-f13b8984-8cb9-457b-b5a7-55488b5f3737.png)
+## Helm chart deployment on Kubernetes
+
+![Screenshot from 2022-04-13 22-57-34](https://user-images.githubusercontent.com/3830633/163277722-e2c6d3de-87a9-4f7d-b93f-461a44556aa1.png)
 
 ## Docker compose `docker-compose up`
 
 ![Screenshot from 2022-04-13 17-06-25](https://user-images.githubusercontent.com/3830633/163223184-3f8ff998-e56b-407c-87ba-67fb2b9ec8f5.png)
 
-## Helm chart deployment on Kubernetes
+## Local using `cargo run`
 
-
+![Screenshot from 2022-04-13 14-28-42](https://user-images.githubusercontent.com/3830633/163191624-f13b8984-8cb9-457b-b5a7-55488b5f3737.png)
 ---
 
 ### For convenience, below limits are set on key values of the algorithm used during computation.
@@ -51,7 +56,4 @@ pub fn create_register_commits(k: Seed, secret: u32) -> Commits {
 }
 ```
 
-<!-- | CI Build and Tests |
-| --------------- | -->
-| ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) | 
-[![build-and-push-zkp-container-images](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml/badge.svg?branch=main)](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml)
+
