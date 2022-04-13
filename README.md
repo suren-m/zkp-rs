@@ -5,12 +5,12 @@ Zero Knowledge Proof demonstration in Rust using client-server model.
 
 For convenience, below limits are set on key values of the algorithm used during computation.
 
-> These limits help avoiding arithmetic `u128` overflows during `a.pow(b)` and prevent getting negative values when calculating `s = k - c.x` (answer). In real-world implementation, these ranges will be much higher and specialized data structures will be implemented to handle very large numbers.
+> These limits help avoiding `u128` arithmetic overflows during `a.pow(b)` and prevent getting negative values when calculating `s = k - c.x` (answer). In real-world implementation, these ranges will be much higher and specialized data structures will be implemented to handle very large numbers.
 
 ```rust
 pub const MAX_USERNAME_LEN: usize = 50;
 
-// min seed value set such that "s = k - c.x" is always positive.
+// min seed value (random k) set such that "s = k - c.x" is always positive.
 pub const MIN_SEED_VAL: u32 = 100;
 
 // max random 'k' value.
