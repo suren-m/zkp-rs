@@ -28,6 +28,16 @@ pub const H: u128 = 2;
 
 // to avoid negative values during "s = k - c.x" calculation
 pub const MAX_CHALLENGE_VAL: u32 = 4;
+
+// Commits creation from client - r1, r2, y1, y2 are all `u128`
+pub fn create_register_commits(k: Seed, secret: u32) -> Commits {
+    Commits {
+        r1: G.pow(k.val),
+        r2: H.pow(k.val),
+        y1: G.pow(secret),
+        y2: H.pow(secret),
+    }
+}
 ```
 
 <!-- | CI Build and Tests |
