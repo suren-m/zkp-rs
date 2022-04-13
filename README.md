@@ -1,9 +1,17 @@
 # [WIP] - zkp-rs
 Zero Knowledge Proof demonstration in Rust using client-server model. 
 
+## Local using `cargo run`
+
 ![Screenshot from 2022-04-13 14-28-42](https://user-images.githubusercontent.com/3830633/163191624-f13b8984-8cb9-457b-b5a7-55488b5f3737.png)
 
-For convenience, below limits are set on key values of the algorithm used during computation.
+## Docker compose `docker-compose up`
+
+![Screenshot from 2022-04-13 17-06-25](https://user-images.githubusercontent.com/3830633/163223184-3f8ff998-e56b-407c-87ba-67fb2b9ec8f5.png)
+
+---
+
+### For convenience, below limits are set on key values of the algorithm used during computation.
 
 > These limits help avoiding `u128` arithmetic overflows during `a.pow(b)` and prevent getting negative values when calculating `s = k - c.x` (answer). In real-world implementation, these ranges will be much higher and specialized data structures will be implemented to handle very large numbers.
 
