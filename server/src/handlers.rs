@@ -1,9 +1,8 @@
 use chrono::Utc;
 use log::info;
-use serde::{Deserialize, Serialize};
+
 use std::{
-    collections::HashMap,
-    io::{Error, ErrorKind, Write},
+    io::{Error},
     net::TcpStream,
 };
 use zkp_common::{
@@ -11,7 +10,7 @@ use zkp_common::{
 };
 
 use crate::{
-    challenge::{self, Challenge},
+    challenge::{Challenge},
     session_store::SessionStore,
 };
 

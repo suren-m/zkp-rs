@@ -27,7 +27,7 @@ mod unittests {
 
     #[test]
     pub fn seed_k_must_be_random_num() {
-        let mut rng = rand::thread_rng();
+        let _rng = rand::thread_rng();
         let k1 = Seed::new();
         let k2 = Seed::new();
         assert_ne!(k1, k2);

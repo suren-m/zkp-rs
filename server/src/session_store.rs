@@ -1,12 +1,12 @@
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::{env, io::Error, io::ErrorKind};
+
+
+
 use zkp_common::request_dto::{Commits, Username};
 
 use crate::challenge::Challenge;
-use crate::server_error::ServerError;
+
 
 #[derive(Debug)]
 pub struct User {
