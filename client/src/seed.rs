@@ -1,15 +1,22 @@
 // Random Seed - k
 
+use log::info;
 use rand::Rng;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct Seed(u128);
+use crate::{MAX_SEED_VAL, MIN_SEED_VAL};
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct Seed {
+    pub val: u32,
+}
 
 impl Seed {
-    /// Random u128 number
+    /// Random u32 number
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
-        Self(rng.gen_range(1..u128::MAX))
+        let val = rng.gen_range(MIN_SEED_VAL..MAX_SEED_VAL);
+        info!("Seed val: {}", val);
+        Self { val }
     }
 }
 
@@ -23,6 +30,6 @@ mod unittests {
         let mut rng = rand::thread_rng();
         let k1 = Seed::new();
         let k2 = Seed::new();
-        assert_ne!(c1, c2);
+        assert_ne!(k1, k2);
     }
 }

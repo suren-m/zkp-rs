@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ServerResponse {
     Success,
-    Challenge(u128),
+    Challenge(u32),
     Failure(String),
 }
 

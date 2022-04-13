@@ -1,17 +1,20 @@
 use std::{env, io::Error, io::ErrorKind};
 
+use crate::{MAX_SECRET_VAL, MAX_USERNAME_LEN};
+
 const USERNAME: &str = "ZKP_USERNAME";
 const SECRET: &str = "ZKP_SECRET";
 
 #[derive(Debug, PartialEq)]
 pub struct UserInfo {
     pub username: String,
-    pub secret: u128,
+    pub secret: u32,
 }
 
 pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
     let mut errors: Vec<Error> = Vec::new();
-
+    // let username = env::set_var(USERNAME, "demouser");
+    // let secret = env::set_var(SECRET, "100");
     let username = env::var(USERNAME);
     let secret = env::var(SECRET);
 
@@ -20,10 +23,13 @@ pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
             ErrorKind::NotFound,
             "Please make sure ZKP_USERNAME env variable is set",
         ));
-    } else if &username.as_ref().unwrap().len() > &50000 {
+    } else if username.as_ref().unwrap().len() > MAX_USERNAME_LEN {
         errors.push(Error::new(
             ErrorKind::InvalidInput,
-            "Please make sure ZKP_USERNAME is less than 50 characters",
+            format!(
+                "Please make sure ZKP_USERNAME is less than {} characters",
+                MAX_USERNAME_LEN
+            ),
         ));
     }
 
@@ -33,12 +39,26 @@ pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
             "Please make sure ZKP_SECRET env variable is set",
         ));
     } else {
-        let secret = secret.as_ref().unwrap().parse::<u128>();
+        let secret = secret.as_ref().unwrap().parse::<u32>();
         if secret.is_err() {
             errors.push(Error::new(
                 ErrorKind::InvalidInput,
-                "Please ensure ZKP_SECRET is a number (u128)",
+                format!(
+                    "Please ensure ZKP_SECRET is a number and is less than {}",
+                    MAX_SECRET_VAL
+                ),
             ));
+        } else {
+            let secret_val = secret.unwrap();
+            if secret_val > MAX_SECRET_VAL {
+                errors.push(Error::new(
+                    ErrorKind::InvalidInput,
+                    format!(
+                        "Please ensure ZKP_SECRET is between 1 and {}",
+                        MAX_SECRET_VAL
+                    ),
+                ));
+            }
         }
     }
 
@@ -50,7 +70,7 @@ pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
     let secret = secret.unwrap();
     Ok(UserInfo {
         username: username,
-        secret: secret.parse::<u128>().unwrap(),
+        secret: secret.parse::<u32>().unwrap(),
     })
 }
 
