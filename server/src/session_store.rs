@@ -1,12 +1,12 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::{env, io::Error, io::ErrorKind};
+
+
+
 use zkp_common::request_dto::{Commits, Username};
 
 use crate::challenge::Challenge;
-use crate::server_error::ServerError;
+
 
 #[derive(Debug)]
 pub struct User {
@@ -14,8 +14,8 @@ pub struct User {
     pub commits: Commits,
     pub is_verified: bool,
     pub challenge: Option<Challenge>,
-    pub last_verified: Option<Utc>,
-    pub last_login: Option<Utc>,
+    pub last_verified: Option<DateTime<Utc>>,
+    pub last_login: Option<DateTime<Utc>>,
 }
 
 pub struct SessionStore {

@@ -1,8 +1,8 @@
+use chrono::Utc;
 use log::info;
-use serde::{Deserialize, Serialize};
+
 use std::{
-    collections::HashMap,
-    io::{Error, ErrorKind, Write},
+    io::{Error},
     net::TcpStream,
 };
 use zkp_common::{
@@ -10,7 +10,7 @@ use zkp_common::{
 };
 
 use crate::{
-    challenge::{self, Challenge},
+    challenge::{Challenge},
     session_store::SessionStore,
 };
 
@@ -77,6 +77,7 @@ pub fn handle_request(
                 if r1 == user.commits.r1 && r2 == user.commits.r2 {
                     info!("verified user");
                     user.is_verified = true;
+                    user.last_verified = Some(Utc::now());
                     return write_and_flush_stream(stream, ServerResponse::Success);
                 } else {
                     return write_and_flush_stream(
@@ -95,8 +96,9 @@ pub fn handle_request(
         }
         ClientRequest::CheckStatus(username) => {
             info!("Status Check Request Received");
-            if let Some(user) = session_store.users.get(&username) {
+            if let Some(user) = session_store.users.get_mut(&username) {
                 if user.is_verified == true {
+                    user.last_login = Some(Utc::now());
                     return write_and_flush_stream(stream, ServerResponse::Success);
                 } else {
                     return write_and_flush_stream(

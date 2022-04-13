@@ -1,24 +1,23 @@
 use env_logger::Env;
-use log::{error, info};
-use std::collections::HashMap;
-use std::io::Read;
+use log::{info};
+
+
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::str::from_utf8;
+
+
 use std::{
-    env,
-    io::{BufRead, BufReader, Write},
-};
-use std::{
-    fs::File,
     net::{Ipv4Addr, SocketAddrV4},
 };
 use zkp_common::request_dto::ClientRequest;
-use zkp_server::session_store;
+use zkp_common::response_dto::ServerResponse;
+use zkp_common::write_and_flush_stream;
+
+
 use zkp_server::session_store::SessionStore;
 
 use serde::Deserialize;
-use serde::Serialize;
+
 
 use zkp_server::handlers::*;
 
@@ -40,7 +39,6 @@ fn main() {
     let listener = TcpListener::bind(socket).unwrap();
     println!("listening on {}", socket);
     for stream in listener.incoming() {
-        println!("new stream incoming");
         let stream = stream.unwrap();
         handle_connection(stream, &mut session_store);
     }
@@ -52,10 +50,13 @@ fn handle_connection(mut stream: TcpStream, session_store: &mut SessionStore) {
     let req = ClientRequest::deserialize(&mut de);
 
     if req.is_err() {
-        println!("req error");
-        //handle_error(stream, users);
+        info!("Invalid request");
+        write_and_flush_stream(
+            &mut stream,
+            ServerResponse::Failure("Unable to deserialize request".to_string()),
+        )
+        .unwrap();
     } else {
-        println!("request received");
         let req = req.unwrap();
         handle_request(req, session_store, &mut stream).unwrap();
     }

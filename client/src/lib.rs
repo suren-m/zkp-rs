@@ -5,7 +5,7 @@ use std::{
 
 use log::warn;
 use seed::Seed;
-use user::UserInfo;
+
 use zkp_common::{
     request_dto::{Answer, ClientRequest, Commits, Username},
     response_dto::ServerResponse,

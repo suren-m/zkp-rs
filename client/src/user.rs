@@ -77,7 +77,7 @@ pub fn get_user_info_from_env_vars() -> Result<UserInfo, Vec<Error>> {
 #[cfg(test)]
 mod unittests {
     use super::*;
-    use pretty_assertions::assert_eq;
+    
 
     fn clear_env_vars() {
         env::remove_var(USERNAME);
