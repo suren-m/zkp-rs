@@ -1,7 +1,9 @@
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+use crate::MAX_CHALLENGE_VAL;
+
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Copy)]
 pub struct Challenge {
     pub val: u32,
 }
@@ -11,7 +13,7 @@ impl Challenge {
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
         Self {
-            val: rng.gen_range(1..25),
+            val: rng.gen_range(1..MAX_CHALLENGE_VAL),
         }
     }
 }

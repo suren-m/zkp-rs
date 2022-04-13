@@ -1,78 +1,86 @@
 use env_logger::Env;
 use log::{error, info};
+use std::io::Error;
 use std::net::TcpStream;
 use std::process::exit;
 use zkp_client::seed::Seed;
 use zkp_client::user::{self};
-use zkp_client::{create_auth_request, create_register_commits, register_user_with_server};
+use zkp_client::{
+    create_auth_request, create_register_commits, prove_auth, register_user_with_server,
+};
+use zkp_common::request_dto::Answer;
 use zkp_common::response_dto::ServerResponse;
 
-fn main() {
+fn main() -> Result<(), Error> {
     init_logger();
+    let socket = "localhost:8080";
     let user_info = user::get_user_info_from_env_vars();
     if user_info.is_err() {
-        info!("Following exceptions occurred when attempting to parse environment variables");
-        for error in user_info.err().unwrap() {
-            error!("{}", error.to_string());
-        }
+        print_errors(user_info.err().unwrap());
         exit(-1);
     }
     let user_info = user_info.unwrap();
 
-    let socket = "localhost:8080";
-    let stream = TcpStream::connect(socket);
-    if stream.is_err() {
-        error!("Can't connect - {}", stream.err().unwrap().to_string());
-        exit(-1);
-    }
-
     // random value used to calculate r1 and r2
     let k = Seed::new();
-    let commits = create_register_commits(k);
+    let commits = create_register_commits(k, user_info.secret);
 
     // attempt registration
-    let mut stream = stream.unwrap();
-    let reg_res = register_user_with_server(&mut stream, user_info.username.to_owned(), commits);
+    let mut stream = connect(socket)?;
+    let reg_res = register_user_with_server(&mut stream, user_info.username.to_owned(), commits)?;
 
-    if reg_res.is_err() {
-        error!(
-            "Error when attempting to register: {}",
-            &reg_res.err().unwrap().to_string()
-        );
-        exit(-1);
-    }
-
-    let resp = reg_res.unwrap();
-    if let ServerResponse::Failure(msg) = &resp {
+    if let ServerResponse::Failure(msg) = &reg_res {
         error!("Server Error when attempting registration");
         error!("{}", msg);
         exit(-1);
     }
 
-    if let ServerResponse::Success = &resp {
+    if let ServerResponse::Success = &reg_res {
         // continue with auth flow
         info!("Registration Successful. Continuing with Auth Request");
 
         // expect challenge
-        let mut new_stream = TcpStream::connect(socket).unwrap();
-        let auth_resp = create_auth_request(&mut new_stream, user_info.username.to_owned());
+        let mut stream = connect(socket)?;
+        let auth_resp = create_auth_request(&mut stream, user_info.username.to_owned())?;
 
-        if auth_resp.is_err() {
-            error!("{}", &auth_resp.err().unwrap().to_string());
-            exit(-1);
-        }
-
-        if let ServerResponse::Challenge(c) = auth_resp.unwrap() {
+        if let ServerResponse::Challenge(c) = auth_resp {
             // solve challenge
             info!("Challenge receieved. Continuing with Auth Request");
             dbg!(c);
+            let answer: Answer = k.val - c * user_info.secret;
+            let mut stream = connect(socket)?;
+            let verify_resp = prove_auth(&mut stream, user_info.username.to_owned(), answer)?;
+            if let ServerResponse::Success = verify_resp {
+                info!("Login sucessful.");
+            } else if let ServerResponse::Failure(msg) = verify_resp {
+                error!("login failed {}", msg);
+            }
         } else {
-            error!("Server dummy Error when attempting authentication request");
+            error!("Server Error when attempting authentication request");
         }
     }
+
+    Ok(())
 }
 
 fn init_logger() {
     // set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+}
+
+fn connect(socket: &str) -> Result<TcpStream, Error> {
+    match TcpStream::connect(socket) {
+        Ok(stream) => Ok(stream),
+        Err(e) => {
+            println!("can't connect");
+            return Err(e);
+        }
+    }
+}
+
+fn print_errors(errors: Vec<Error>) {
+    info!("Following exceptions occurred when attempting to initialzie the client");
+    for error in errors {
+        error!("{}", error.to_string());
+    }
 }

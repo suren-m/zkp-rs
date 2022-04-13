@@ -6,10 +6,13 @@ use std::{
     net::TcpStream,
 };
 use zkp_common::{
-    request_dto::ClientRequest, response_dto::ServerResponse, write_and_flush_stream,
+    request_dto::ClientRequest, response_dto::ServerResponse, write_and_flush_stream, G, H,
 };
 
-use crate::{challenge::Challenge, session_store::SessionStore};
+use crate::{
+    challenge::{self, Challenge},
+    session_store::SessionStore,
+};
 
 pub fn handle_request(
     req: ClientRequest,
@@ -43,10 +46,56 @@ pub fn handle_request(
         }
         ClientRequest::Authenticate(username) => {
             info!("Autentication Request Received. Responding with Challenge");
-            let challenge = Challenge::new().val;
-            return write_and_flush_stream(stream, ServerResponse::Challenge(challenge));
+
+            if let Some(user) = session_store.users.get_mut(&username) {
+                let challenge = Challenge::new();
+                user.challenge = Some(challenge);
+                return write_and_flush_stream(stream, ServerResponse::Challenge(challenge.val));
+            } else {
+                return write_and_flush_stream(
+                    stream,
+                    ServerResponse::Failure(
+                        "User does not exist. Registration required".to_string(),
+                    ),
+                );
+            }
         }
-        ClientRequest::ProveAuthentication(answer) => Ok(()),
-        ClientRequest::CheckStatus => todo!(),
+        ClientRequest::ProveAuthentication(username, answer) => {
+            info!("Verify Auth Request Received");
+            if let Some(user) = session_store.users.get(&username) {
+                dbg!(&user);
+                if user.challenge.is_none() {
+                    return write_and_flush_stream(
+                        stream,
+                        ServerResponse::Failure("challenge expired. Retry login".to_owned()),
+                    );
+                }
+                // let mut
+                // if answer < 0 {
+                //     let s: u32 = answer.try_into().unwrap() * -1;
+                // }
+
+                let r1 = G.pow(answer) * user.commits.y1.pow(user.challenge.unwrap().val);
+                let r2 = H.pow(answer) * user.commits.y2.pow(user.challenge.unwrap().val);
+
+                if r1 == user.commits.r1 && r2 == user.commits.r2 {
+                    info!("valid user");
+                    return write_and_flush_stream(stream, ServerResponse::Success);
+                } else {
+                    return write_and_flush_stream(
+                        stream,
+                        ServerResponse::Failure("Login failed. Commits don't match".to_string()),
+                    );
+                }
+            } else {
+                return write_and_flush_stream(
+                    stream,
+                    ServerResponse::Failure(
+                        "User does not exist. Registration required".to_string(),
+                    ),
+                );
+            }
+        }
+        ClientRequest::CheckStatus(username) => todo!(),
     }
 }
