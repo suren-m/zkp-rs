@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: zkp-client-deploy
+  name: zkp-client-deploy
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: zkp-client-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: zkp-client-deploy
+    spec:
+      containers:
+        - image: ghcr.io/suren-m/zkp-client:latest
+          name: zkp-client
+          imagePullPolicy: Always
+          env:
+            - name: ZKP_USERNAME
+              value: {{ .Values.username | quote }}
+            - name: ZKP_SECRET
+              value: {{ .Values.secret | quote }}
+          resources: {}
+status: {}

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: zkp-server-deploy
+  name: zkp-server-deploy
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: zkp-server-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: zkp-server-deploy
+    spec:
+      containers:
+        - image: ghcr.io/suren-m/zkp-server:latest
+          name: zkp-server
+          imagePullPolicy: Always
+          resources: {}
+status: {}
