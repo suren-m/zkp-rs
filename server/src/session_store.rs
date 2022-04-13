@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -14,8 +14,8 @@ pub struct User {
     pub commits: Commits,
     pub is_verified: bool,
     pub challenge: Option<Challenge>,
-    pub last_verified: Option<Utc>,
-    pub last_login: Option<Utc>,
+    pub last_verified: Option<DateTime<Utc>>,
+    pub last_login: Option<DateTime<Utc>>,
 }
 
 pub struct SessionStore {

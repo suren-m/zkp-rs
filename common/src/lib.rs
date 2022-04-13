@@ -21,8 +21,7 @@ pub fn write_and_flush_stream<T: Serialize>(stream: &mut TcpStream, data: T) -> 
     let j = serde_json::to_string(&data);
     if j.is_ok() {
         let data = j.unwrap();
-        info!("writing to response stream");
-        dbg!(&data);
+        info!("Writing to stream: {}", &data);
         stream.flush().unwrap();
         // sending anything other than json string from client will result in connection reset
         stream.write(data.as_bytes()).unwrap();
