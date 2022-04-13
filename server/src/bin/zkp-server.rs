@@ -1,23 +1,18 @@
 use env_logger::Env;
-use log::{info};
+use log::info;
 
-
+use std::env;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
-
-use std::{
-    net::{Ipv4Addr, SocketAddrV4},
-};
+use std::net::{Ipv4Addr, SocketAddrV4};
 use zkp_common::request_dto::ClientRequest;
 use zkp_common::response_dto::ServerResponse;
 use zkp_common::write_and_flush_stream;
 
-
 use zkp_server::session_store::SessionStore;
 
 use serde::Deserialize;
-
 
 use zkp_server::handlers::*;
 
@@ -34,8 +29,12 @@ fn main() {
     init_logger();
     let mut session_store = init_session_store();
 
-    let loopback = Ipv4Addr::new(127, 0, 0, 1);
-    let socket = SocketAddrV4::new(loopback, 8080);
+    //127.0.0.1 won't work in containerized env
+    let loopback = Ipv4Addr::new(0, 0, 0, 0);
+    let port = env::var("APP_PORT").unwrap_or("9090".to_string());
+    let port: u16 = port.parse::<u16>().unwrap();
+
+    let socket = SocketAddrV4::new(loopback, port);
     let listener = TcpListener::bind(socket).unwrap();
     println!("listening on {}", socket);
     for stream in listener.incoming() {

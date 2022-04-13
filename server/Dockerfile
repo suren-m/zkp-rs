@@ -1,7 +1,7 @@
 # Builder
 FROM rust:1.58.0-bullseye as build
 
-WORKDIR /zkp-server
+WORKDIR /app
 COPY . .
 
 # build server package
@@ -12,6 +12,6 @@ FROM debian:bullseye-slim
 LABEL org.opencontainers.image.source https://github.com/suren-m/zkp-rs
 
 RUN mkdir -p /usr/local/bin
-COPY --from=build zkp-server/target/release/zkp-server /usr/local/bin
+COPY --from=build app/target/release/zkp-server /usr/local/bin/
 
-ENTRYPOINT [zkp-server]
+ENTRYPOINT ["zkp-server"]

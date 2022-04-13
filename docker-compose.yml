@@ -1,0 +1,27 @@
+version: '3'
+services:
+  zkp-server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    ports:
+      - "9090:9090"
+    # command: "zkp-server"
+    environment:
+      APP_PORT: 9090
+    restart: unless-stopped
+
+  zkp-client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    depends_on:
+      - zkp-server
+    # Give some time for the server to come up
+    # command: >
+    #   bash -c "echo waiting && sleep 5 && zkp-client"    
+    environment:
+      ZKP_USERNAME: container-user
+      ZKP_SECRET: 10
+      SERVER_PORT: 9090
+    restart: unless-stopped

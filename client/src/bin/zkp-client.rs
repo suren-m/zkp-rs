@@ -4,7 +4,7 @@ use log::{error, info};
 use std::io::Error;
 use std::net::TcpStream;
 use std::process::exit;
-use std::thread;
+use std::{env, thread};
 use zkp_client::seed::Seed;
 use zkp_client::user::{self};
 use zkp_client::{
@@ -16,7 +16,10 @@ use zkp_common::response_dto::ServerResponse;
 
 fn main() -> Result<(), Error> {
     init_logger();
-    let socket = "localhost:8080";
+    let port = env::var("SERVER_PORT").unwrap_or("9090".to_string());
+    let socket = &format!("zkp-server:{}", port);
+    dbg!(socket);
+
     let user_info = user::get_user_info_from_env_vars();
     if user_info.is_err() {
         print_errors(user_info.err().unwrap());
