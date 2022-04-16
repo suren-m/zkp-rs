@@ -27,7 +27,7 @@ jobs:
           git config --global user.name 'workflow_action'
           git config --global user.email 'workflow_action@users.noreply.github.com'
           git commit -am "docs: published from workflow"
-
+          git push origin
     
       
       
