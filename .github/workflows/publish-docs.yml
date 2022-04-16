@@ -1,0 +1,33 @@
+name: Publish Docs
+
+on:
+  push:
+    branches:
+      - main  
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: clear existing docs
+        run: rm -rf ./docs/*      
+      - name: Generate Cargo Docs
+        id: generate
+        run: cargo docs --no-deps --target-dir ./docs
+      - name: Setup index and redirect        
+        run: |
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp-server\">" > target/doc/index.html
+      - name: commit
+        run: |
+          git commit -am "docs: published from workflow"
+
+    
+      
+      
+
+
