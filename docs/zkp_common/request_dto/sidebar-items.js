@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ClientRequest",""]],"struct":[["Commits","r1, r2 from client"]],"type":[["Answer",""],["Username",""]]});
