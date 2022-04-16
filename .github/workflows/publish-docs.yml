@@ -21,7 +21,7 @@ jobs:
         run: cargo doc --no-deps --target-dir ./docs
       - name: Setup index and redirect        
         run: |
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp-server\">" > target/doc/index.html
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp-server\">" > ./docs/index.html
       - name: commit
         run: |
           git commit -am "docs: published from workflow"
