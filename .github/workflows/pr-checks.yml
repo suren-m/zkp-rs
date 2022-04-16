@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/README.md'
+      - 'docs/**'
   schedule:
     - cron: "0 7,19 * * *"
   workflow_dispatch:

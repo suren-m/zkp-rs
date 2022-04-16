@@ -1,11 +1,14 @@
 name: publish zkp container images
 
 on:
-  schedule:
-    - cron: "00 13 * * *"
+  #schedule:
+  #  - cron: "00 13 * * *"
   push:
     branches: [main]
-    tags: ["v*.*.*"]
+    paths-ignore:
+      - '**/README.md'
+      - 'docs/**'
+    # tags: ["v*.*.*"]
 
 env:
   SERVER_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/zkp-server
