@@ -24,6 +24,8 @@ jobs:
           echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp-server\">" > ./docs/index.html
       - name: commit
         run: |
+          git config --global user.name 'workflow_action'
+          git config --global user.email 'workflow_action@users.noreply.github.com'
           git commit -am "docs: published from workflow"
 
     
