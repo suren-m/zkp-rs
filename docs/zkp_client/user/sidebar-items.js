@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["get_user_info_from_env_vars",""]],"struct":[["UserInfo",""]]});
