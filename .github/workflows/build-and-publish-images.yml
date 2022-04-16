@@ -5,9 +5,9 @@ on:
   #  - cron: "00 13 * * *"
   push:
     branches: [main]
-    paths-ignore:
-      - '**/README.md'
-      - 'docs/**'
+    paths:
+      - '!**/README.md'
+      - '!docs/**'
     # tags: ["v*.*.*"]
 
 env:
