@@ -6,6 +6,8 @@ Zero Knowledge Proof demonstration in Rust using client-server model.
 | ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) | 
 [![build-and-push-zkp-container-images](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml/badge.svg?branch=main)](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml)
 
+### Documentation: https://suren-m.github.io/zkp-rs/
+
 ## Helm chart deployment on Kubernetes
 
 ![Screenshot from 2022-04-13 22-57-34](https://user-images.githubusercontent.com/3830633/163277722-e2c6d3de-87a9-4f7d-b93f-461a44556aa1.png)
