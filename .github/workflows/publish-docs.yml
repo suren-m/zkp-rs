@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main  
-    paths-ignore:
-      - '**/README.md'     
+    paths:
+      - '!**/README.md'     
       
   workflow_dispatch:
 
@@ -21,10 +21,12 @@ jobs:
         run: rm -rf ./docs/*      
       - name: Generate Cargo Docs
         id: generate
-        run: cargo doc --no-deps --target-dir ./docs
+        run: cargo doc --no-deps --release
+      - name: Copy to docs dir
+        run: cp -r ./target/doc/* ./docs/
       - name: Setup index and redirect        
         run: |
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp-server\">" > ./docs/index.html
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=zkp_server\">" > ./docs/index.html
       - name: commit
         run: |
           git config --global user.name 'workflow_action'
