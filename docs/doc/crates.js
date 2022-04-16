@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["zkp_client","zkp_common","zkp_server"];
