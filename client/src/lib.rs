@@ -1,3 +1,25 @@
+//! zkp_client includes modules and functions used to communicate with the zkp_server
+//! These include functionalities for:
+//! * Generating the commits `r1, r2` using secret `x` (set via env variables)
+//! * Generating random `k` value and computing `y1` and `y2` by `g^K` and `h^K`
+//! * zkp flow
+//!     * create_commits
+//!     * register_user_with_server
+//!     * prove authenticity using `s = k - c.x` where c is the challenge from server
+//!     * continue to communicate with server once logged in  
+//! ### Constraints
+//! Following Constraints are set for convenience during exponential operations
+//! Example:
+//! ```rust
+//! pub const MAX_USERNAME_LEN: usize = 50;
+//! // min 'k' value set so that "s = k - c.x" is always positive.
+//! pub const MIN_SEED_VAL: u32 = 100;
+//! // max 'k' value. used during g^K and h^K operations
+//! pub const MAX_SEED_VAL: u32 = 125;
+//! // used when computing y1 = g^x and y2 = h^x
+//! pub const MAX_SECRET_VAL: u32 = 25;
+//! ```
+
 use core::time;
 use std::{
     io::{Error},
@@ -21,22 +43,24 @@ pub mod seed;
 pub mod user;
 pub mod auth;
 
-/// Constraints
+
 pub const MAX_USERNAME_LEN: usize = 50;
 
-// for convenience
-// min seed value set so that "s = k - c.x" is always positive.
+// min `K` value set so that "s = k - c.x" is always positive.
 pub const MIN_SEED_VAL: u32 = 100;
 
-// max random 'k' value.
 // smaller value chosen for convenience during g^K and h^K operations
 pub const MAX_SEED_VAL: u32 = 125;
 
 // for convenience when computing y1 = g^x and y2 = h^x
 pub const MAX_SECRET_VAL: u32 = 25;
 
+/// * create_commits
+/// * register_user_with_server
+/// * prove authenticity using `s = k - c.x` where c is the challenge from server
+/// * continue to communicate with server once logged in 
 pub fn init_zkp_flow(user_info: UserInfo, socket: &str) -> Result<(), Error>{
-        // random value used to calculate r1 and r2
+    // random value used to calculate r1 and r2
     let k = Seed::new();
     let commits = create_register_commits(k, user_info.secret);
 
@@ -88,6 +112,14 @@ pub fn init_zkp_flow(user_info: UserInfo, socket: &str) -> Result<(), Error>{
     Ok(())
 }
 
+/// Uses `TCPStream::connect` to establish connection to server and returns a `TcpStream` instance if successful.
+/// ### Example:
+/// ```rust
+/// let port = env::var("SERVER_PORT").unwrap_or("9090".to_string());
+/// let server_loc = env::var("SERVER_ADDRESS").unwrap_or("localhost".to_string());
+/// let socket = &format!("{}:{}", server_loc, port);
+/// let mut stream = connect(socket)?;
+/// ```
 fn connect(socket: &str) -> Result<TcpStream, Error> {
     match TcpStream::connect(socket) {
         Ok(stream) => Ok(stream),
@@ -98,12 +130,12 @@ fn connect(socket: &str) -> Result<TcpStream, Error> {
     }
 }
 
-
-pub fn init_logger() {
-    // set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/
+/// Env Logger level `info`. Set `$RUST_LOG` env variable accordingly to change severity levels
+pub fn init_logger() {   
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 }
 
+/// Prints any errors that occur during env variables validation
 pub fn print_errors(errors: Vec<Error>) {
     info!("Following exceptions occurred when attempting to initialzie the client");
     for error in errors {
