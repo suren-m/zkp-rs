@@ -1,0 +1,19 @@
+version: '3'
+services:
+  zkp-server:
+    image: ghcr.io/suren-m/zkp-server:latest
+    ports:
+      - "9090:9090"
+    environment:
+      APP_PORT: 9090
+    restart: unless-stopped
+
+  zkp-client:
+    image: ghcr.io/suren-m/zkp-client:latest
+    depends_on:
+      - zkp-server    
+    environment:
+      ZKP_USERNAME: container-user
+      ZKP_SECRET: 10
+      SERVER_PORT: 9090
+    restart: unless-stopped
