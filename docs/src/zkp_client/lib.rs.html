@@ -115,7 +115,61 @@
 <span id="110">110</span>
 <span id="111">111</span>
 <span id="112">112</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::time</span>;
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+</pre><pre class="rust"><code><span class="doccomment">//! zkp_client includes modules and functions used to communicate with the zkp_server</span>
+<span class="doccomment">//! These include functionalities for:</span>
+<span class="doccomment">//! * Generating the commits `r1, r2` using secret `x` (set via env variables)</span>
+<span class="doccomment">//! * Generating random `k` value and computing `y1` and `y2` by `g^K` and `h^K`</span>
+<span class="doccomment">//! * zkp flow</span>
+<span class="doccomment">//!     * create_commits</span>
+<span class="doccomment">//!     * register_user_with_server</span>
+<span class="doccomment">//!     * prove authenticity using `s = k - c.x` where c is the challenge from server</span>
+<span class="doccomment">//!     * continue to communicate with server once logged in  </span>
+<span class="doccomment">//! ### Constraints</span>
+<span class="doccomment">//! Following Constraints are set for convenience during exponential operations</span>
+<span class="doccomment">//! Example:</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! pub const MAX_USERNAME_LEN: usize = 50;</span>
+<span class="doccomment">//! // min &#39;k&#39; value set so that &quot;s = k - c.x&quot; is always positive.</span>
+<span class="doccomment">//! pub const MIN_SEED_VAL: u32 = 100;</span>
+<span class="doccomment">//! // max &#39;k&#39; value. used during g^K and h^K operations</span>
+<span class="doccomment">//! pub const MAX_SEED_VAL: u32 = 125;</span>
+<span class="doccomment">//! // used when computing y1 = g^x and y2 = h^x</span>
+<span class="doccomment">//! pub const MAX_SECRET_VAL: u32 = 25;</span>
+<span class="doccomment">//! ```</span>
+
+<span class="kw">use</span> <span class="ident">core::time</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">io</span>::{<span class="ident">Error</span>},
     <span class="ident">net::TcpStream</span>, <span class="ident">process::exit</span>, <span class="ident">thread</span>,
@@ -138,22 +192,24 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">user</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">auth</span>;
 
-<span class="doccomment">/// Constraints</span>
+
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_USERNAME_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">50</span>;
 
-<span class="comment">// for convenience</span>
-<span class="comment">// min seed value set so that &quot;s = k - c.x&quot; is always positive.</span>
+<span class="comment">// min `K` value set so that &quot;s = k - c.x&quot; is always positive.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MIN_SEED_VAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">100</span>;
 
-<span class="comment">// max random &#39;k&#39; value.</span>
 <span class="comment">// smaller value chosen for convenience during g^K and h^K operations</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_SEED_VAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">125</span>;
 
 <span class="comment">// for convenience when computing y1 = g^x and y2 = h^x</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_SECRET_VAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">25</span>;
 
+<span class="doccomment">/// * create_commits</span>
+<span class="doccomment">/// * register_user_with_server</span>
+<span class="doccomment">/// * prove authenticity using `s = k - c.x` where c is the challenge from server</span>
+<span class="doccomment">/// * continue to communicate with server once logged in </span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_zkp_flow</span>(<span class="ident">user_info</span>: <span class="ident">UserInfo</span>, <span class="ident">socket</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>{
-        <span class="comment">// random value used to calculate r1 and r2</span>
+    <span class="comment">// random value used to calculate r1 and r2</span>
     <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Seed::new</span>();
     <span class="kw">let</span> <span class="ident">commits</span> <span class="op">=</span> <span class="ident">create_register_commits</span>(<span class="ident">k</span>, <span class="ident">user_info</span>.<span class="ident">secret</span>);
 
@@ -205,6 +261,14 @@
     <span class="prelude-val">Ok</span>(())
 }
 
+<span class="doccomment">/// Uses `TCPStream::connect` to establish connection to server and returns a `TcpStream` instance if successful.</span>
+<span class="doccomment">/// ### Example:</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// let port = env::var(&quot;SERVER_PORT&quot;).unwrap_or(&quot;9090&quot;.to_string());</span>
+<span class="doccomment">/// let server_loc = env::var(&quot;SERVER_ADDRESS&quot;).unwrap_or(&quot;localhost&quot;.to_string());</span>
+<span class="doccomment">/// let socket = &amp;format!(&quot;{}:{}&quot;, server_loc, port);</span>
+<span class="doccomment">/// let mut stream = connect(socket)?;</span>
+<span class="doccomment">/// ```</span>
 <span class="kw">fn</span> <span class="ident">connect</span>(<span class="ident">socket</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">TcpStream::connect</span>(<span class="ident">socket</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">stream</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">stream</span>),
@@ -215,12 +279,12 @@
     }
 }
 
-
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_logger</span>() {
-    <span class="comment">// set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/</span>
+<span class="doccomment">/// Env Logger level `info`. Set `$RUST_LOG` env variable accordingly to change severity levels</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_logger</span>() {   
     <span class="ident">env_logger::Builder::from_env</span>(<span class="ident">Env::default</span>().<span class="ident">default_filter_or</span>(<span class="string">&quot;info&quot;</span>)).<span class="ident">init</span>();
 }
 
+<span class="doccomment">/// Prints any errors that occur during env variables validation</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_errors</span>(<span class="ident">errors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span>) {
     <span class="macro">info!</span>(<span class="string">&quot;Following exceptions occurred when attempting to initialzie the client&quot;</span>);
     <span class="kw">for</span> <span class="ident">error</span> <span class="kw">in</span> <span class="ident">errors</span> {
