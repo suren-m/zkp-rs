@@ -1,4 +1,4 @@
-# [WIP] - zkp-rs
+# zkp-rs
 Zero Knowledge Proof demonstration in Rust using client-server model. 
 
 | ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) | 
@@ -73,4 +73,21 @@ export ZKP_SECRET=10
 
 # Run client
 cargo run --bin zkp-client
+```
+
 ---
+
+## Screenshots
+
+### 1. Docker-Compose
+
+![Screenshot from 2022-04-18 17-18-47](https://user-images.githubusercontent.com/3830633/163839109-6db074fd-136b-4a70-9a82-2da37da76eef.png)
+
+### 2. Helm Chart install on a Kubernetes cluster
+
+![Screenshot from 2022-04-18 17-20-00](https://user-images.githubusercontent.com/3830633/163839281-8407fa71-a20e-4cb8-8110-c53fa34e24ff.png)
+
+### 3. Local using `Cargo run`
+
+![Screenshot from 2022-04-18 17-22-00](https://user-images.githubusercontent.com/3830633/163839349-975c3a6a-86ab-484f-b227-b2d7af20d81d.png)
+
