@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["check_status",""],["create_auth_request",""],["create_register_commits",""],["prove_auth",""],["register_user_with_server",""]]});
+initSidebarItems({"fn":[["check_status",""],["create_auth_request",""],["create_register_commits",""],["make_request",""],["prove_auth",""],["register_user_with_server",""]]});
