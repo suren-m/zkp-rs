@@ -4,7 +4,6 @@ use std::{
 };
 
 use log::warn;
-use reqwest::Client;
 use crate::seed::Seed;
 
 use zkp_common::{

@@ -1,20 +1,18 @@
 use core::time;
 use std::{
-    io::{BufReader, ErrorKind, Error},
+    io::{Error},
     net::TcpStream, process::exit, thread,
 };
 
 use auth::{create_register_commits, register_user_with_server};
 use env_logger::Env;
 use log::{error, info};
-use reqwest::Client;
 use seed::Seed;
 
 use user::UserInfo;
 use zkp_common::{
-    request_dto::{Answer, ClientRequest, Commits, Username},
+    request_dto::{Answer},
     response_dto::ServerResponse,
-    write_and_flush_stream, G, H,
 };
 
 use crate::auth::{create_auth_request, prove_auth, check_status};
