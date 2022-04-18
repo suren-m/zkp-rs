@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["MAX_SECRET_VAL",""],["MAX_SEED_VAL",""],["MAX_USERNAME_LEN",""],["MIN_SEED_VAL",""]],"fn":[["check_status",""],["create_auth_request",""],["create_register_commits",""],["prove_auth",""],["register_user_with_server",""]],"mod":[["seed",""],["user",""]]});
+initSidebarItems({"constant":[["MAX_SECRET_VAL",""],["MAX_SEED_VAL",""],["MAX_USERNAME_LEN","Constraints"],["MIN_SEED_VAL",""]],"fn":[["init_logger",""],["init_zkp_flow",""],["print_errors",""]],"mod":[["auth",""],["seed",""],["user",""]]});
