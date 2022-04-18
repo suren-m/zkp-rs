@@ -81,11 +81,11 @@ cargo run --bin zkp-client
 
 ### 1. Docker-Compose
 
-![Screenshot from 2022-04-18 17-18-47](https://user-images.githubusercontent.com/3830633/163839109-6db074fd-136b-4a70-9a82-2da37da76eef.png)
+![Screenshot from 2022-04-18 17-59-01](https://user-images.githubusercontent.com/3830633/163844104-fc8e04ed-d2ac-4c46-8986-bcae9e85297d.png)
 
 ### 2. Helm Chart install on a Kubernetes cluster
 
-![Screenshot from 2022-04-18 17-20-00](https://user-images.githubusercontent.com/3830633/163839281-8407fa71-a20e-4cb8-8110-c53fa34e24ff.png)
+![Screenshot from 2022-04-18 17-58-10](https://user-images.githubusercontent.com/3830633/163844193-f6ed49ff-96f0-4a05-a928-24a558044ba1.png)
 
 ### 3. Local using `Cargo run`
 
