@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["MAX_CHALLENGE_VAL",""]],"mod":[["challenge",""],["handlers",""],["session_store",""]]});
+initSidebarItems({"constant":[["MAX_CHALLENGE_VAL",""]],"fn":[["init_logger",""],["init_session_store",""]],"mod":[["challenge",""],["handlers",""],["session_store",""]]});
