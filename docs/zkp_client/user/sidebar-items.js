@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_user_info_from_env_vars",""]],"struct":[["UserInfo",""]]});
+initSidebarItems({"constant":[["SECRET",""],["USERNAME",""]],"fn":[["get_user_info_from_env_vars",""]],"struct":[["UserInfo",""]]});
