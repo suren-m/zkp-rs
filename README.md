@@ -8,12 +8,16 @@ Zero Knowledge Proof demonstration in Rust using client-server model.
 
 ---
 
-## Documentation: 
+## Documentation
 
 Generated from `Cargo doc` and published to github pages
 
-https://suren-m.github.io/zkp-rs/
+### https://suren-m.github.io/zkp-rs/
 
+By Crate:
+* [zkp_client](https://suren-m.github.io/zkp-rs/zkp_client/index.html)
+* [zkp_common](https://suren-m.github.io/zkp-rs/zkp_common/index.html)
+* [zkp_server](https://suren-m.github.io/zkp-rs/zkp_server/index.html)
 ---
 
 ## Getting Started
