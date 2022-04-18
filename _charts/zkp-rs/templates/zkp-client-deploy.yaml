@@ -26,5 +26,9 @@ spec:
               value: {{ .Values.username | quote }}
             - name: ZKP_SECRET
               value: {{ .Values.secret | quote }}
+            - name: SERVER_ADDRESS
+              value: "zkp-server"
+            - name: SERVER_PORT
+              value: "9090"
           resources: {}
 status: {}

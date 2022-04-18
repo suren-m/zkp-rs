@@ -24,4 +24,5 @@ services:
       ZKP_USERNAME: container-user
       ZKP_SECRET: 10
       SERVER_PORT: 9090
+      SERVER_ADDRESS: zkp-server
     restart: unless-stopped
