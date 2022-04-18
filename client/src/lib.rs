@@ -23,7 +23,7 @@
 use core::time;
 use std::{
     io::{Error},
-    net::TcpStream, process::exit, thread,
+    net::TcpStream, process::exit, thread, 
 };
 
 use auth::{create_register_commits, register_user_with_server};
@@ -55,11 +55,15 @@ pub const MAX_SEED_VAL: u32 = 125;
 // for convenience when computing y1 = g^x and y2 = h^x
 pub const MAX_SECRET_VAL: u32 = 25;
 
+
+pub type Callback = fn(&str, &UserInfo) -> Result<(), Error>;
+
+
 /// * create_commits
 /// * register_user_with_server
 /// * prove authenticity using `s = k - c.x` where c is the challenge from server
 /// * continue to communicate with server once logged in 
-pub fn init_zkp_flow(user_info: UserInfo, socket: &str) -> Result<(), Error>{
+pub fn init_zkp_flow(user_info: UserInfo, socket: &str, callback: Callback) -> Result<(), Error>{
     // random value used to calculate r1 and r2
     let k = Seed::new();
     let commits = create_register_commits(k, user_info.secret);
@@ -89,18 +93,8 @@ pub fn init_zkp_flow(user_info: UserInfo, socket: &str) -> Result<(), Error>{
             let mut stream = connect(socket)?;
             let verify_resp = prove_auth(&mut stream, user_info.username.to_owned(), answer)?;
             if let ServerResponse::Success = verify_resp {
-                info!("Login sucessful.");
-                loop {
-                    info!("checking status");
-                    thread::sleep(time::Duration::from_secs(5));
-                    let mut stream = connect(socket)?;
-                    let status_resp = check_status(&mut stream, user_info.username.to_owned())?;
-                    if let ServerResponse::Success = status_resp {
-                        info!("still logged in");
-                    } else {
-                        error!("Not Logged in. Try authenticating again");
-                    }
-                }
+                info!("Login sucessful. Invoking Callback");                
+                callback(socket, &user_info)?;
             } else if let ServerResponse::Failure(msg) = verify_resp {
                 error!("login failed {}", msg);
             }
@@ -120,7 +114,7 @@ pub fn init_zkp_flow(user_info: UserInfo, socket: &str) -> Result<(), Error>{
 /// let socket = &format!("{}:{}", server_loc, port);
 /// let mut stream = connect(socket)?;
 /// ```
-fn connect(socket: &str) -> Result<TcpStream, Error> {
+pub fn connect(socket: &str) -> Result<TcpStream, Error> {
     match TcpStream::connect(socket) {
         Ok(stream) => Ok(stream),
         Err(e) => {
@@ -129,6 +123,22 @@ fn connect(socket: &str) -> Result<TcpStream, Error> {
         }
     }
 }
+
+// callback upon login success - infinite loop
+pub fn login_callback(socket: &str, user_info: &UserInfo) -> Result<(), Error>{
+     loop {
+        info!("checking status");
+        thread::sleep(time::Duration::from_secs(5));      
+        let mut stream = connect(socket)?;
+        let status_resp = check_status(&mut stream, user_info.username.to_owned())?;
+        if let ServerResponse::Success = status_resp {
+            info!("still logged in");
+        } else {
+            error!("Not Logged in. Try authenticating again");
+        }
+    }
+}
+
 
 /// Env Logger level `info`. Set `$RUST_LOG` env variable accordingly to change severity levels
 pub fn init_logger() {   
@@ -142,3 +152,4 @@ pub fn print_errors(errors: Vec<Error>) {
         error!("{}", error.to_string());
     }
 }
+

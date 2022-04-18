@@ -5,7 +5,7 @@ use crate::{MAX_SECRET_VAL, MAX_USERNAME_LEN};
 const USERNAME: &str = "ZKP_USERNAME";
 const SECRET: &str = "ZKP_SECRET";
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct UserInfo {
     pub username: String,
     pub secret: u32,

@@ -6,7 +6,7 @@ use std::{env};
 
 use zkp_client::user::{self};
 use zkp_client::{
-    print_errors, init_logger, init_zkp_flow,
+    print_errors, init_logger, init_zkp_flow, login_callback,
 };
 fn main() -> Result<(), Error> {
 
@@ -23,7 +23,7 @@ fn main() -> Result<(), Error> {
     }
     let user_info = user_info.unwrap();
     
-    init_zkp_flow(user_info, socket)
+    init_zkp_flow(user_info, socket, login_callback)
 }
 
 
