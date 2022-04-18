@@ -1,7 +1,9 @@
-use env_logger::Env;
 use log::info;
+use zkp_server::init_logger;
+use zkp_server::init_session_store;
 
 use std::env;
+use std::io::Error;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
@@ -16,20 +18,13 @@ use serde::Deserialize;
 
 use zkp_server::handlers::*;
 
-fn init_logger() {
-    // set $RUST_LOG env variable accordingly https://docs.rs/env_logger/0.8.2/env_logger/
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-}
 
-fn init_session_store() -> SessionStore {
-    SessionStore::new()
-}
 
-fn main() {
+fn main() -> Result<(), Error> {
     init_logger();
     let mut session_store = init_session_store();
 
-    //127.0.0.1 won't work in containerized env
+    // 127.0.0.1 won't work in a containerized env
     let loopback = Ipv4Addr::new(0, 0, 0, 0);
     let port = env::var("APP_PORT").unwrap_or("9090".to_string());
     let port: u16 = port.parse::<u16>().unwrap();
@@ -39,11 +34,12 @@ fn main() {
     println!("listening on {}", socket);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        handle_connection(stream, &mut session_store);
+        handle_connection(stream, &mut session_store)?
     }
+    Ok(())
 }
 
-fn handle_connection(mut stream: TcpStream, session_store: &mut SessionStore) {
+fn handle_connection(mut stream: TcpStream, session_store: &mut SessionStore) -> Result<(), Error>{
     let mut de = serde_json::Deserializer::from_reader(&stream);
 
     let req = ClientRequest::deserialize(&mut de);
@@ -53,10 +49,9 @@ fn handle_connection(mut stream: TcpStream, session_store: &mut SessionStore) {
         write_and_flush_stream(
             &mut stream,
             ServerResponse::Failure("Unable to deserialize request".to_string()),
-        )
-        .unwrap();
+        )       
     } else {
-        let req = req.unwrap();
-        handle_request(req, session_store, &mut stream).unwrap();
+        let req = req?;
+        handle_request(req, session_store, &mut stream)
     }
 }
