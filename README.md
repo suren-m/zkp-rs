@@ -1,4 +1,4 @@
-# [WIP] - zkp-rs
+# zkp-rs
 Zero Knowledge Proof demonstration in Rust using client-server model. 
 
 | ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) | 
