@@ -3,10 +3,7 @@ name: Publish Docs
 on:
   push:
     branches:
-      - main  
-    paths:
-      - '!**/README.md'     
-      
+      - main    
   workflow_dispatch:
 
 env:
@@ -21,7 +18,7 @@ jobs:
         run: rm -rf ./docs/*      
       - name: Generate Cargo Docs
         id: generate
-        run: cargo doc --no-deps --release
+        run: cargo doc --no-deps --document-private-items --all-features --release
       - name: Copy to docs dir
         run: cp -r ./target/doc/* ./docs/
       - name: Setup index and redirect        
