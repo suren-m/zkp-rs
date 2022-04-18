@@ -8,6 +8,7 @@ on:
     paths:
       - '!**/README.md'
       - '!docs/**'
+  workflow_dispatch:
     # tags: ["v*.*.*"]
 
 env:
