@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["SessionStore",""],["User",""]]});
+window.SIDEBAR_ITEMS = {"struct":[["SessionStore",""],["User",""]]};

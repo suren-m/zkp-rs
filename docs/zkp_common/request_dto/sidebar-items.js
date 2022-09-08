@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ClientRequest",""]],"struct":[["Commits","r1, r2 from client"]],"type":[["Answer",""],["Username",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["ClientRequest",""]],"struct":[["Commits","r1, r2 from client"]],"type":[["Answer",""],["Username",""]]};

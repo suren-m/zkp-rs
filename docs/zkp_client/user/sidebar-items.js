@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["SECRET",""],["USERNAME",""]],"fn":[["get_user_info_from_env_vars",""]],"struct":[["UserInfo",""]]});
+window.SIDEBAR_ITEMS = {"constant":[["SECRET",""],["USERNAME",""]],"fn":[["get_user_info_from_env_vars",""]],"struct":[["UserInfo",""]]};
