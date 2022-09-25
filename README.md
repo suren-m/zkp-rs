@@ -1,5 +1,5 @@
 # zkp-rs
-Zero Knowledge Proof demonstration in Rust using client-server model. 
+A very simplified demonstration of Zero Knowledge Proof using client-server model, implemented in Rust.
 
 ![CI Build and Tests](https://github.com/suren-m/zkp-rs/actions/workflows/pr-checks.yml/badge.svg) 
 ![build-and-push-zkp-container-images](https://github.com/suren-m/zkp-rs/actions/workflows/build-and-publish-images.yml/badge.svg) 
